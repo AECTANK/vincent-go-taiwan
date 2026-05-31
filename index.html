@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vincent 專車預約 | Airport Transfer</title>
+    <!-- 引入 Bootstrap 美化介面 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 LINE 官方 LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: none; }
+        .btn-primary { background-color: #00B900; border-color: #00B900; width: 100%; border-radius: 10px; font-weight: bold; }
+        .btn-primary:hover { background-color: #009900; border-color: #009900; }
+    </style>
+</head>
+<body>
+
+<div class="container max-w-md mx-auto">
+    <div class="card p-4">
+        <h4 class="text-center mb-4" id="formTitle">📅 機場接送預約單</h4>
+        
+        <form id="bookingForm">
+            <!-- 隱藏欄位：偷偷紀錄系統抓到的資料 -->
+            <input type="hidden" id="lineUid" name="lineUid">
+            <input type="hidden" id="lineName" name="lineName">
+            <input type="hidden" id="language" name="language">
+
+            <div class="mb-3">
+                <label class="form-label" id="labelTime">預約時間</label>
+                <input type="datetime-local" class="form-control" id="pickupTime" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label" id="labelPickup">上車地點</label>
+                <input type="text" class="form-control" id="pickupLocation" placeholder="如：新店區北新路二段" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label" id="labelDropoff">下車地點</label>
+                <input type="text" class="form-control" id="dropoffLocation" placeholder="如：桃園機場第一航廈" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label" id="labelFlight">航班號 (選填)</label>
+                <input type="text" class="form-control" id="flightNo" placeholder="如：JX840">
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label" id="labelPax">搭乘人數</label>
+                    <input type="number" class="form-control" id="pax" min="1" max="8" value="1" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label" id="labelLuggage">行李件數</label>
+                    <input type="number" class="form-control" id="luggage" min="0" max="10" value="1" required>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label" id="labelSpecial">特殊需求 (選填)</label>
+                <input type="text" class="form-control" id="specialRequest" placeholder="如：需要嬰兒椅">
+            </div>
+
+            <button type="button" class="btn btn-primary py-2" id="submitBtn" onclick="sendData()">送出預約</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // --- 1. 語系翻譯包 ---
+    const i18n = {
+        'zh-Hant': {
+            title: "📅 機場接送預約單", time: "預約時間", pickup: "上車地點", dropoff: "下車地點",
+            flight: "航班號 (選填)", pax: "搭乘人數", luggage: "行李件數", special: "特殊需求 (選填)", btn: "送出預約"
+        },
+        'en': {
+            title: "📅 Airport Transfer Booking", time: "Date & Time", pickup: "Pick-up Location", dropoff: "Drop-off Location",
+            flight: "Flight No. (Optional)", pax: "Passengers", luggage: "Luggages", special: "Special Requests (Optional)", btn: "Submit Booking"
+        }
+    };
+
+    // --- 2. 初始化 LIFF ---
+    async function initializeLiff() {
+        try {
+            // 填入您的 LIFF ID
+            await liff.init({ liffId: "2010242759-jtaIBPFs" }); 
+            
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('lineUid').value = profile.userId;
+                document.getElementById('lineName').value = profile.displayName;
+                
+                // 偵測語系並切換 UI
+                const lang = liff.getLanguage() === 'zh-Hant' ? 'zh-Hant' : 'en';
+                document.getElementById('language').value = lang;
+                
+                document.getElementById('formTitle').innerText = i18n[lang].title;
+                document.getElementById('labelTime').innerText = i18n[lang].time;
+                document.getElementById('labelPickup').innerText = i18n[lang].pickup;
+                document.getElementById('labelDropoff').innerText = i18n[lang].dropoff;
+                document.getElementById('labelFlight').innerText = i18n[lang].flight;
+                document.getElementById('labelPax').innerText = i18n[lang].pax;
+                document.getElementById('labelLuggage').innerText = i18n[lang].luggage;
+                document.getElementById('labelSpecial').innerText = i18n[lang].special;
+                document.getElementById('submitBtn').innerText = i18n[lang].btn;
+            } else {
+                liff.login(); // 沒登入就要求登入
+            }
+        } catch (err) {
+            console.error('LIFF 初始化失敗', err);
+        }
+    }
+
+    // --- 3. 傳送資料給 Make.com ---
+    function sendData() {
+        // 抓取表單資料
+        const bookingData = {
+            uid: document.getElementById('lineUid').value,
+            name: document.getElementById('lineName').value,
+            lang: document.getElementById('language').value,
+            time: document.getElementById('pickupTime').value,
+            pickup: document.getElementById('pickupLocation').value,
+            dropoff: document.getElementById('dropoffLocation').value,
+            flight: document.getElementById('flightNo').value,
+            pax: document.getElementById('pax').value,
+            luggage: document.getElementById('luggage').value,
+            special: document.getElementById('specialRequest').value
+        };
+
+        // ⚠️ 請在這裡換成您 Make.com 的 Webhook 網址 ⚠️
+        const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/cv6wmi0n71l92wxpe4buasv94vbh8p4y";
+
+        document.getElementById('submitBtn').innerText = "傳送中...";
+        document.getElementById('submitBtn').disabled = true;
+
+        fetch(MAKE_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bookingData)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("預約資料已送出！客服系統將立即為您報價。");
+                liff.closeWindow(); // 成功後自動關掉表單回到聊天室
+            } else {
+                alert("傳送失敗，請稍後再試。");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("網路錯誤，請檢查連線。");
+        });
+    }
+
+    // 網頁載入完成時，啟動 LIFF
+    window.onload = initializeLiff;
+</script>
+
+</body>
+</html>
