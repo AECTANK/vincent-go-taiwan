@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vincent 專車預約 | Airport Transfer</title>
-    <!-- 引入 Bootstrap 美化介面 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 引入 LINE 官方 LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -22,7 +20,6 @@
         <h4 class="text-center mb-4" id="formTitle">📅 機場接送預約單</h4>
         
         <form id="bookingForm">
-            <!-- 隱藏欄位：偷偷紀錄系統抓到的資料 -->
             <input type="hidden" id="lineUid" name="lineUid">
             <input type="hidden" id="lineName" name="lineName">
             <input type="hidden" id="language" name="language">
@@ -34,7 +31,7 @@
             
             <div class="mb-3">
                 <label class="form-label" id="labelPickup">上車地點</label>
-                <input type="text" class="form-control" id="pickupLocation" placeholder="如：新店區北新路二段" required>
+                <input type="text" class="form-control" id="pickupLocation" placeholder="如：新北市新店區北新路二段" required>
             </div>
             
             <div class="mb-3">
@@ -92,8 +89,9 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                // 偵測語系並切換 UI
-                const lang = liff.getLanguage() === 'zh-Hant' ? 'zh-Hant' : 'en';
+                // 偵測語系並切換 UI (已放寬判定，只要有 zh 就顯示繁體中文)
+                const currentLang = liff.getLanguage() || "";
+                const lang = currentLang.includes('zh') ? 'zh-Hant' : 'en';
                 document.getElementById('language').value = lang;
                 
                 document.getElementById('formTitle').innerText = i18n[lang].title;
@@ -129,7 +127,7 @@
             special: document.getElementById('specialRequest').value
         };
 
-        // ⚠️ 請在這裡換成您 Make.com 的 Webhook 網址 ⚠️
+        // ⚠️ 實戰提醒：請務必把下方引號內的中文，換成您在 Make.com 裡的 Webhook 網址 ⚠️
         const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/cv6wmi0n71l92wxpe4buasv94vbh8p4y";
 
         document.getElementById('submitBtn').innerText = "傳送中...";
@@ -146,11 +144,17 @@
                 liff.closeWindow(); // 成功後自動關掉表單回到聊天室
             } else {
                 alert("傳送失敗，請稍後再試。");
+                // 失敗時把按鈕恢復原狀
+                document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
+                document.getElementById('submitBtn').disabled = false;
             }
         })
         .catch(error => {
             console.error("Error:", error);
             alert("網路錯誤，請檢查連線。");
+            // 失敗時把按鈕恢復原狀
+            document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
+            document.getElementById('submitBtn').disabled = false;
         });
     }
 
