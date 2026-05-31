@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vincent 專車預約 | Airport Transfer</title>
+    <!-- 引入 Bootstrap 美化介面 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 LINE 官方 LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -20,6 +22,7 @@
         <h4 class="text-center mb-4" id="formTitle">📅 機場接送預約單</h4>
         
         <form id="bookingForm">
+            <!-- 隱藏欄位：偷偷紀錄系統抓到的資料 -->
             <input type="hidden" id="lineUid" name="lineUid">
             <input type="hidden" id="lineName" name="lineName">
             <input type="hidden" id="language" name="language">
@@ -31,12 +34,12 @@
             
             <div class="mb-3">
                 <label class="form-label" id="labelPickup">上車地點</label>
-                <input type="text" class="form-control" id="pickupLocation" placeholder="如：新北市新店區北新路二段" required>
+                <input type="text" class="form-control" id="pickupLocation" placeholder="..." required>
             </div>
             
             <div class="mb-3">
                 <label class="form-label" id="labelDropoff">下車地點</label>
-                <input type="text" class="form-control" id="dropoffLocation" placeholder="如：桃園機場第一航廈" required>
+                <input type="text" class="form-control" id="dropoffLocation" placeholder="..." required>
             </div>
             
             <div class="mb-3">
@@ -57,7 +60,7 @@
 
             <div class="mb-4">
                 <label class="form-label" id="labelSpecial">特殊需求 (選填)</label>
-                <input type="text" class="form-control" id="specialRequest" placeholder="如：需要嬰兒椅">
+                <input type="text" class="form-control" id="specialRequest" placeholder="...">
             </div>
 
             <button type="button" class="btn btn-primary py-2" id="submitBtn" onclick="sendData()">送出預約</button>
@@ -66,7 +69,7 @@
 </div>
 
 <script>
-    // --- 1. 語系翻譯包 ---
+    // --- 1. 語系翻譯包 (新增 日、韓、泰) ---
     const i18n = {
         'zh-Hant': {
             title: "📅 機場接送預約單", time: "預約時間", pickup: "上車地點", dropoff: "下車地點",
@@ -75,6 +78,18 @@
         'en': {
             title: "📅 Airport Transfer Booking", time: "Date & Time", pickup: "Pick-up Location", dropoff: "Drop-off Location",
             flight: "Flight No. (Optional)", pax: "Passengers", luggage: "Luggages", special: "Special Requests (Optional)", btn: "Submit Booking"
+        },
+        'ja': {
+            title: "📅 空港送迎予約", time: "予約日時", pickup: "乗車場所", dropoff: "降車場所",
+            flight: "便名 (任意)", pax: "乗車人数", luggage: "荷物の数", special: "特別なご要望 (任意)", btn: "予約を送信"
+        },
+        'ko': {
+            title: "📅 공항 픽업 예약", time: "예약 시간", pickup: "탑승 장소", dropoff: "하차 장소",
+            flight: "항공편 번호 (선택)", pax: "탑승 인원", luggage: "수하물 개수", special: "요청 사항 (선택)", btn: "예약 전송"
+        },
+        'th': {
+            title: "📅 จองรถรับส่งสนามบิน", time: "วันและเวลา", pickup: "จุดรับ", dropoff: "จุดส่ง",
+            flight: "เที่ยวบิน (ไม่บังคับ)", pax: "จำนวนผู้โดยสาร", luggage: "จำนวนสัมภาระ", special: "คำขอพิเศษ (ไม่บังคับ)", btn: "ยืนยันการจอง"
         }
     };
 
@@ -89,9 +104,20 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                // 偵測語系並切換 UI (已放寬判定，只要有 zh 就顯示繁體中文)
-                const currentLang = liff.getLanguage() || "";
-                const lang = currentLang.includes('zh') ? 'zh-Hant' : 'en';
+                // 偵測語系並切換 UI (支援 中、英、日、韓、泰)
+                const currentLang = (liff.getLanguage() || "").toLowerCase();
+                let lang = 'en'; // 預設為英文 (Fallback)
+                
+                if (currentLang.includes('zh') || currentLang.includes('tw')) {
+                    lang = 'zh-Hant';
+                } else if (currentLang.includes('ja')) {
+                    lang = 'ja';
+                } else if (currentLang.includes('ko')) {
+                    lang = 'ko';
+                } else if (currentLang.includes('th')) {
+                    lang = 'th';
+                }
+                
                 document.getElementById('language').value = lang;
                 
                 document.getElementById('formTitle').innerText = i18n[lang].title;
@@ -128,7 +154,7 @@
         };
 
         // ⚠️ 實戰提醒：請務必把下方引號內的中文，換成您在 Make.com 裡的 Webhook 網址 ⚠️
-        const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/cv6wmi0n71l92wxpe4buasv94vbh8p4y";
+        const MAKE_WEBHOOK_URL = "您的_MAKE_WEBHOOK_網址_貼在這裡";
 
         document.getElementById('submitBtn').innerText = "傳送中...";
         document.getElementById('submitBtn').disabled = true;
@@ -140,10 +166,17 @@
         })
         .then(response => {
             if (response.ok) {
-                alert("預約資料已送出！客服系統將立即為您報價。");
+                // 送出成功的提示維持該使用者的語系
+                let successMsg = "預約資料已送出！客服系統將立即為您報價。";
+                if(bookingData.lang === 'en') successMsg = "Booking submitted! We will quote you shortly.";
+                if(bookingData.lang === 'ja') successMsg = "予約が送信されました！すぐにお見積もりいたします。";
+                if(bookingData.lang === 'ko') successMsg = "예약이 전송되었습니다! 곧 견적을 보내드리겠습니다.";
+                if(bookingData.lang === 'th') successMsg = "ส่งข้อมูลการจองแล้ว! เราจะเสนอราคาให้คุณเร็วๆ นี้";
+                
+                alert(successMsg);
                 liff.closeWindow(); // 成功後自動關掉表單回到聊天室
             } else {
-                alert("傳送失敗，請稍後再試。");
+                alert("傳送失敗，請稍後再試 / Submission failed, please try again.");
                 // 失敗時把按鈕恢復原狀
                 document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
                 document.getElementById('submitBtn').disabled = false;
@@ -151,7 +184,7 @@
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("網路錯誤，請檢查連線。");
+            alert("網路錯誤，請檢查連線 / Network error, please check connection.");
             // 失敗時把按鈕恢復原狀
             document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
             document.getElementById('submitBtn').disabled = false;
