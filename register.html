@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vincent 專屬會員建檔 | VVIP Registration</title>
+    <!-- 引入 Bootstrap 美化介面 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 LINE 官方 LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: none; }
+        .btn-primary { background-color: #00B900; border-color: #00B900; width: 100%; border-radius: 10px; font-weight: bold; }
+        .btn-primary:hover { background-color: #009900; border-color: #009900; }
+        .vip-badge { text-align: center; color: #d4af37; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<div class="container max-w-md mx-auto">
+    <div class="card p-4">
+        <div class="vip-badge">✦ VVIP MEMBER ✦</div>
+        <h4 class="text-center mb-4" id="formTitle">👤 首次預約建檔</h4>
+        <p class="text-center text-muted mb-4" id="formDesc" style="font-size: 0.9rem;">為了順利發送派車確認單，請留下您的聯絡資訊。</p>
+        
+        <form id="registerForm">
+            <!-- 隱藏欄位：紀錄 LINE 的身分特徵 -->
+            <input type="hidden" id="lineUid" name="lineUid">
+            <input type="hidden" id="lineName" name="lineName">
+            <input type="hidden" id="language" name="language">
+
+            <div class="mb-3">
+                <label class="form-label" id="labelPassName">真實姓名 (乘車聯絡人)</label>
+                <input type="text" class="form-control" id="passengerName" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label" id="labelPassPhone">聯絡電話</label>
+                <input type="tel" class="form-control" id="passengerPhone" required>
+            </div>
+            
+            <div class="mb-4">
+                <label class="form-label" id="labelEmail">電子信箱</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+
+            <button type="button" class="btn btn-primary py-2" id="submitBtn" onclick="sendData()">確認並完成預約</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // --- 1. 五國語系翻譯包 ---
+    const i18n = {
+        'zh-Hant': {
+            title: "👤 首次預約建檔", desc: "為了順利發送派車確認單，請留下您的聯絡資訊。",
+            passName: "真實姓名 (乘車聯絡人)", passPhone: "聯絡電話", email: "電子信箱", btn: "確認並完成預約"
+        },
+        'en': {
+            title: "👤 First-Time Registration", desc: "Please provide your contact info to receive the booking confirmation.",
+            passName: "Full Name (Passenger)", passPhone: "Contact Phone", email: "Email Address", btn: "Confirm Booking"
+        },
+        'ja': {
+            title: "👤 初回登録", desc: "予約確認書をお送りするため、連絡先をご入力ください。",
+            passName: "お名前（乗客名）", passPhone: "電話番号", email: "メールアドレス", btn: "予約を確定する"
+        },
+        'ko': {
+            title: "👤 첫 예약 등록", desc: "예약 확인서를 받으실 연락처를 남겨주세요.",
+            passName: "성함 (탑승자)", passPhone: "연락처", email: "이메일", btn: "예약 확정"
+        },
+        'th': {
+            title: "👤 ลงทะเบียนครั้งแรก", desc: "โปรดระบุข้อมูลการติดต่อเพื่อรับใบยืนยันการจอง",
+            passName: "ชื่อ-นามสกุล (ผู้โดยสาร)", passPhone: "เบอร์โทรศัพท์", email: "อีเมล", btn: "ยืนยันการจอง"
+        }
+    };
+
+    // --- 2. 初始化 LIFF ---
+    async function initializeLiff() {
+        try {
+            // ⚠️ 這裡需要填入一個「全新的 LIFF ID」 ⚠️
+            await liff.init({ liffId: "請貼上_專屬於註冊表單的_LIFF_ID" }); 
+            
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('lineUid').value = profile.userId;
+                document.getElementById('lineName').value = profile.displayName;
+                
+                // 智慧語系偵測
+                const currentLang = (liff.getLanguage() || "").toLowerCase();
+                let lang = 'en'; 
+                
+                if (currentLang.includes('zh') || currentLang.includes('tw')) {
+                    lang = 'zh-Hant';
+                } else if (currentLang.includes('ja')) {
+                    lang = 'ja';
+                } else if (currentLang.includes('ko')) {
+                    lang = 'ko';
+                } else if (currentLang.includes('th')) {
+                    lang = 'th';
+                }
+                
+                document.getElementById('language').value = lang;
+                
+                // 替換畫面文字
+                document.getElementById('formTitle').innerText = i18n[lang].title;
+                document.getElementById('formDesc').innerText = i18n[lang].desc;
+                document.getElementById('labelPassName').innerText = i18n[lang].passName;
+                document.getElementById('labelPassPhone').innerText = i18n[lang].passPhone;
+                document.getElementById('labelEmail').innerText = i18n[lang].email;
+                document.getElementById('submitBtn').innerText = i18n[lang].btn;
+            } else {
+                liff.login(); 
+            }
+        } catch (err) {
+            console.error('LIFF 初始化失敗', err);
+        }
+    }
+
+    // --- 3. 傳送資料給 Make.com ---
+    function sendData() {
+        const registerData = {
+            type: "registration", // 加上 type 標籤，方便 Make 辨識這是註冊資料
+            uid: document.getElementById('lineUid').value,
+            name: document.getElementById('lineName').value,
+            lang: document.getElementById('language').value,
+            passName: document.getElementById('passengerName').value,
+            passPhone: document.getElementById('passengerPhone').value,
+            email: document.getElementById('email').value
+        };
+
+        // ⚠️ 貼上您的 Make Webhook 網址 (可以跟行程表單用同一個) ⚠️
+        const MAKE_WEBHOOK_URL = "您的_MAKE_WEBHOOK_網址_貼在這裡";
+
+        document.getElementById('submitBtn').innerText = "處理中...";
+        document.getElementById('submitBtn').disabled = true;
+
+        fetch(MAKE_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(registerData)
+        })
+        .then(response => {
+            if (response.ok) {
+                let successMsg = "建檔完成！您的派車單已寄出。";
+                if(registerData.lang === 'en') successMsg = "Registration complete! Confirmation sent.";
+                if(registerData.lang === 'ja') successMsg = "登録完了！確認書を送信しました。";
+                if(registerData.lang === 'ko') successMsg = "등록 완료! 예약 확인서가 전송되었습니다.";
+                if(registerData.lang === 'th') successMsg = "ลงทะเบียนสำเร็จ! ส่งใบยืนยันแล้ว";
+                
+                alert(successMsg);
+                liff.closeWindow(); 
+            } else {
+                alert("傳送失敗，請稍後再試。");
+                document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
+                document.getElementById('submitBtn').disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("網路錯誤，請檢查連線。");
+            document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
+            document.getElementById('submitBtn').disabled = false;
+        });
+    }
+
+    window.onload = initializeLiff;
+</script>
+
+</body>
+</html>
