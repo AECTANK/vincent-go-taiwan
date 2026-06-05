@@ -4,13 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vincent 專車預約 | Airport Transfer</title>
+    <!-- 引入 Bootstrap 美化介面 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 LINE 官方 LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: none; }
-        .btn-primary { background-color: #00B900; border-color: #00B900; width: 100%; border-radius: 10px; font-weight: bold; }
-        .btn-primary:hover { background-color: #009900; border-color: #009900; }
+        /* 尊榮質感色系調配 */
+        body { background-color: #E8ECEF; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: none; }
+        .btn-primary { 
+            background-color: #2C3E50; 
+            border-color: #2C3E50; 
+            color: #FFFFFF; 
+            width: 100%; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+            transition: all 0.3s ease; 
+        }
+        .btn-primary:hover { 
+            background-color: #1A252F; 
+            border-color: #1A252F; 
+            color: #FFFFFF; 
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3); 
+        }
     </style>
 </head>
 <body>
@@ -20,6 +37,7 @@
         <h4 class="text-center mb-4" id="formTitle">📅 機場接送預約單</h4>
         
         <form id="bookingForm">
+            <!-- 隱藏欄位：偷偷紀錄系統抓到的資料 -->
             <input type="hidden" id="lineUid" name="lineUid">
             <input type="hidden" id="lineName" name="lineName">
             <input type="hidden" id="language" name="language">
@@ -44,6 +62,15 @@
                 <input type="text" class="form-control" id="flightNo" placeholder="如：JX840">
             </div>
 
+            <!-- 車型選擇下拉選單 -->
+            <div class="mb-3">
+                <label class="form-label" id="labelCarType">車型選擇</label>
+                <select class="form-select" id="carType" required>
+                    <option value="舒適5人座">舒適5人座 (5-Seater)</option>
+                    <option value="豪華9人座">豪華9人座 (9-Seater)</option>
+                </select>
+            </div>
+
             <div class="row mb-3">
                 <div class="col-6">
                     <label class="form-label" id="labelPax">搭乘人數</label>
@@ -66,27 +93,27 @@
 </div>
 
 <script>
-    // --- 1. 語系翻譯包 (新增 日、韓、泰) ---
+    // --- 1. 語系翻譯包 ---
     const i18n = {
         'zh-Hant': {
             title: "📅 機場接送預約單", time: "預約時間", pickup: "上車地點", dropoff: "下車地點",
-            flight: "航班號 (選填)", pax: "搭乘人數", luggage: "行李件數", special: "特殊需求 (選填)", btn: "送出預約"
+            flight: "航班號 (選填)", carType: "車型選擇", pax: "搭乘人數", luggage: "行李件數", special: "特殊需求 (選填)", btn: "送出預約"
         },
         'en': {
             title: "📅 Airport Transfer Booking", time: "Date & Time", pickup: "Pick-up Location", dropoff: "Drop-off Location",
-            flight: "Flight No. (Optional)", pax: "Passengers", luggage: "Luggages", special: "Special Requests (Optional)", btn: "Submit Booking"
+            flight: "Flight No. (Optional)", carType: "Vehicle Type", pax: "Passengers", luggage: "Luggages", special: "Special Requests (Optional)", btn: "Submit Booking"
         },
         'ja': {
             title: "📅 空港送迎予約", time: "予約日時", pickup: "乗車場所", dropoff: "降車場所",
-            flight: "便名 (任意)", pax: "乗車人数", luggage: "荷物の数", special: "特別なご要望 (任意)", btn: "予約を送信"
+            flight: "便名 (任意)", carType: "車種を選択", pax: "乗車人数", luggage: "荷物の数", special: "特別なご要望 (任意)", btn: "予約を送信"
         },
         'ko': {
             title: "📅 공항 픽업 예약", time: "예약 시간", pickup: "탑승 장소", dropoff: "하차 장소",
-            flight: "항공편 번호 (선택)", pax: "탑승 인원", luggage: "수하물 개수", special: "요청 사항 (선택)", btn: "예약 전송"
+            flight: "항공편 번호 (선택)", carType: "차량 유형", pax: "탑승 인원", luggage: "수하물 개수", special: "요청 사항 (선택)", btn: "예약 전송"
         },
         'th': {
             title: "📅 จองรถรับส่งสนามบิน", time: "วันและเวลา", pickup: "จุดรับ", dropoff: "จุดส่ง",
-            flight: "เที่ยวบิน (ไม่บังคับ)", pax: "จำนวนผู้โดยสาร", luggage: "จำนวนสัมภาระ", special: "คำขอพิเศษ (ไม่บังคับ)", btn: "ยืนยันการจอง"
+            flight: "เที่ยวบิน (ไม่บังคับ)", carType: "ประเภทรถ", pax: "จำนวนผู้โดยสาร", luggage: "จำนวนสัมภาระ", special: "คำขอพิเศษ (ไม่บังคับ)", btn: "ยืนยันการจอง"
         }
     };
 
@@ -101,9 +128,9 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                // 偵測語系並切換 UI (支援 中、英、日、韓、泰)
+                // 偵測語系並切換 UI
                 const currentLang = (liff.getLanguage() || "").toLowerCase();
-                let lang = 'en'; // 預設為英文 (Fallback)
+                let lang = 'en'; // 預設為英文
                 
                 if (currentLang.includes('zh') || currentLang.includes('tw')) {
                     lang = 'zh-Hant';
@@ -122,12 +149,13 @@
                 document.getElementById('labelPickup').innerText = i18n[lang].pickup;
                 document.getElementById('labelDropoff').innerText = i18n[lang].dropoff;
                 document.getElementById('labelFlight').innerText = i18n[lang].flight;
+                document.getElementById('labelCarType').innerText = i18n[lang].carType;
                 document.getElementById('labelPax').innerText = i18n[lang].pax;
                 document.getElementById('labelLuggage').innerText = i18n[lang].luggage;
                 document.getElementById('labelSpecial').innerText = i18n[lang].special;
                 document.getElementById('submitBtn').innerText = i18n[lang].btn;
             } else {
-                liff.login(); // 沒登入就要求登入
+                liff.login(); 
             }
         } catch (err) {
             console.error('LIFF 初始化失敗', err);
@@ -136,7 +164,6 @@
 
     // --- 3. 傳送資料給 Make.com ---
     function sendData() {
-        // 抓取表單資料
         const bookingData = {
             uid: document.getElementById('lineUid').value,
             name: document.getElementById('lineName').value,
@@ -145,13 +172,12 @@
             pickup: document.getElementById('pickupLocation').value,
             dropoff: document.getElementById('dropoffLocation').value,
             flight: document.getElementById('flightNo').value,
+            carType: document.getElementById('carType').value, 
             pax: document.getElementById('pax').value,
             luggage: document.getElementById('luggage').value,
-            special: document.getElementById('specialRequest').value,
-            carType: "Honda Odyssey 2.4" // 加入車隊招牌車型規格
+            special: document.getElementById('specialRequest').value
         };
 
-        // 已替換為您的專屬 Webhook 網址
         const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ij01j2spxq7cgiebtcvj5ktj7idlhu2k";
 
         document.getElementById('submitBtn').innerText = "傳送中...";
@@ -164,7 +190,6 @@
         })
         .then(response => {
             if (response.ok) {
-                // 送出成功的提示維持該使用者的語系
                 let successMsg = "預約資料已送出！客服系統將立即為您報價。";
                 if(bookingData.lang === 'en') successMsg = "Booking submitted! We will quote you shortly.";
                 if(bookingData.lang === 'ja') successMsg = "予約が送信されました！すぐにお見積もりいたします。";
@@ -172,10 +197,9 @@
                 if(bookingData.lang === 'th') successMsg = "ส่งข้อมูลการจองแล้ว! เราจะเสนอราคาให้คุณเร็วๆ นี้";
                 
                 alert(successMsg);
-                liff.closeWindow(); // 成功後自動關掉表單回到聊天室
+                liff.closeWindow(); 
             } else {
                 alert("傳送失敗，請稍後再試 / Submission failed, please try again.");
-                // 失敗時把按鈕恢復原狀
                 document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
                 document.getElementById('submitBtn').disabled = false;
             }
@@ -183,13 +207,11 @@
         .catch(error => {
             console.error("Error:", error);
             alert("網路錯誤，請檢查連線 / Network error, please check connection.");
-            // 失敗時把按鈕恢復原狀
             document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
             document.getElementById('submitBtn').disabled = false;
         });
     }
 
-    // 網頁載入完成時，啟動 LIFF
     window.onload = initializeLiff;
 </script>
 
