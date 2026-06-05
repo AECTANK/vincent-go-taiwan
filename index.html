@@ -9,12 +9,21 @@
     <!-- 引入 LINE 官方 LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        /* 尊榮質感色系調配 */
-        body { background-color: #E8ECEF; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: none; }
+        /* 方案B：五星海軍藍 (頂級飯店禮賓部質感) */
+        body { 
+            background-color: #FDFBF7; /* 溫潤的珍珠燕麥白 */
+            padding: 20px; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        .card { 
+            border-radius: 15px; 
+            box-shadow: 0 8px 24px rgba(10, 37, 64, 0.08); /* 帶有微藍調的柔和懸浮陰影 */
+            border: none; 
+            background-color: #FFFFFF;
+        }
         .btn-primary { 
-            background-color: #2C3E50; 
-            border-color: #2C3E50; 
+            background-color: #0A2540; /* 頂級深海軍藍 */
+            border-color: #0A2540; 
             color: #FFFFFF; 
             width: 100%; 
             border-radius: 10px; 
@@ -22,11 +31,11 @@
             letter-spacing: 1px; 
             transition: all 0.3s ease; 
         }
-        .btn-primary:hover { 
-            background-color: #1A252F; 
-            border-color: #1A252F; 
+        .btn-primary:hover, .btn-primary:active { 
+            background-color: #153E75; /* 點擊時透出寶石藍微光澤 */
+            border-color: #153E75; 
             color: #FFFFFF; 
-            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3); 
+            box-shadow: 0 4px 12px rgba(10, 37, 64, 0.3); 
         }
     </style>
 </head>
@@ -120,7 +129,6 @@
     // --- 2. 初始化 LIFF ---
     async function initializeLiff() {
         try {
-            // 填入您的 LIFF ID
             await liff.init({ liffId: "2010242759-jtaIBPFs" }); 
             
             if (liff.isLoggedIn()) {
@@ -128,9 +136,8 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                // 偵測語系並切換 UI
                 const currentLang = (liff.getLanguage() || "").toLowerCase();
-                let lang = 'en'; // 預設為英文
+                let lang = 'en'; 
                 
                 if (currentLang.includes('zh') || currentLang.includes('tw')) {
                     lang = 'zh-Hant';
