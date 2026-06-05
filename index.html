@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vincent 專車預約 | Airport Transfer</title>
-    <!-- 引入 Bootstrap 美化介面 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 引入 LINE 官方 LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -22,7 +20,6 @@
         <h4 class="text-center mb-4" id="formTitle">📅 機場接送預約單</h4>
         
         <form id="bookingForm">
-            <!-- 隱藏欄位：偷偷紀錄系統抓到的資料 -->
             <input type="hidden" id="lineUid" name="lineUid">
             <input type="hidden" id="lineName" name="lineName">
             <input type="hidden" id="language" name="language">
@@ -150,11 +147,12 @@
             flight: document.getElementById('flightNo').value,
             pax: document.getElementById('pax').value,
             luggage: document.getElementById('luggage').value,
-            special: document.getElementById('specialRequest').value
+            special: document.getElementById('specialRequest').value,
+            carType: "Honda Odyssey 2.4" // 加入車隊招牌車型規格
         };
 
-        // ⚠️ 實戰提醒：請務必把下方引號內的中文，換成您在 Make.com 裡的 Webhook 網址 ⚠️
-        const MAKE_WEBHOOK_URL = "您的_MAKE_WEBHOOK_網址_貼在這裡";
+        // 已替換為您的專屬 Webhook 網址
+        const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ij01j2spxq7cgiebtcvj5ktj7idlhu2k";
 
         document.getElementById('submitBtn').innerText = "傳送中...";
         document.getElementById('submitBtn').disabled = true;
