@@ -136,17 +136,29 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                const currentLang = (liff.getLanguage() || "").toLowerCase();
-                let lang = 'en'; 
+                // 🌟 核心修改：新增攔截網址參數的功能 🌟
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlLang = urlParams.get('lang'); // 抓取網址後面的 ?lang= 值
                 
-                if (currentLang.includes('zh') || currentLang.includes('tw')) {
+                let lang = 'en'; // 系統底層預設為英文
+                
+                // 第一關：強制判斷網址帶過來的參數 (這會覆蓋手機系統語言)
+                if (urlLang === 'tw') {
                     lang = 'zh-Hant';
-                } else if (currentLang.includes('ja')) {
-                    lang = 'ja';
-                } else if (currentLang.includes('ko')) {
-                    lang = 'ko';
-                } else if (currentLang.includes('th')) {
-                    lang = 'th';
+                } else if (urlLang === 'en') {
+                    lang = 'en';
+                } else {
+                    // 第二關：如果網址沒有帶參數，才退回使用 LINE App 自身的語系設定
+                    const currentLang = (liff.getLanguage() || "").toLowerCase();
+                    if (currentLang.includes('zh') || currentLang.includes('tw')) {
+                        lang = 'zh-Hant';
+                    } else if (currentLang.includes('ja')) {
+                        lang = 'ja';
+                    } else if (currentLang.includes('ko')) {
+                        lang = 'ko';
+                    } else if (currentLang.includes('th')) {
+                        lang = 'th';
+                    }
                 }
                 
                 document.getElementById('language').value = lang;
@@ -200,7 +212,7 @@
                 let successMsg = "預約資料已送出！客服系統將立即為您報價。";
                 if(bookingData.lang === 'en') successMsg = "Booking submitted! We will quote you shortly.";
                 if(bookingData.lang === 'ja') successMsg = "予約が送信されました！すぐにお見積もりいたします。";
-                if(bookingData.lang === 'ko') successMsg = "예약이 전송되었습니다! 곧 견적을 보내드리겠습니다.";
+                if(bookingData.lang === 'ko') 매successMsg = "예약이 전송되었습니다! 곧 견적을 보내드리겠습니다.";
                 if(bookingData.lang === 'th') successMsg = "ส่งข้อมูลการจองแล้ว! เราจะเสนอราคาให้คุณเร็วๆ นี้";
                 
                 alert(successMsg);
