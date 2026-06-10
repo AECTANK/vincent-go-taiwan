@@ -82,7 +82,7 @@
 
             <div class="row mb-3 align-items-end">
                 <div class="col-6">
-                    <label class="form-label mb-2" id="labelLuggageMedium" style="font-size: 0.85rem; line-height: 1.2;">行李 (20-26吋)</label>
+                    <label class="form-label mb-2" id="labelLuggageMedium" style="font-size: 0.85rem; line-height: 1.2;">行李 (26吋以下)</label>
                     <input type="number" class="form-control" id="luggageMedium" min="0" max="10" value="0" required>
                 </div>
                 <div class="col-6">
@@ -107,31 +107,31 @@
         'zh-Hant': {
             title: "📅 機場接送預約單", time: "預約時間", pickup: "上車地點", dropoff: "下車地點",
             flight: "航班號 (選填)", carType: "車型選擇", pax: "搭乘人數", 
-            luggageMedium: "行李 (20-26吋)", luggageLarge: "行李 (28吋以上)", 
+            luggageMedium: "行李 (26吋以下)", luggageLarge: "行李 (28吋以上)", 
             special: "特殊需求 (選填)", btn: "送出預約"
         },
         'en': {
             title: "📅 Airport Transfer Booking", time: "Date & Time", pickup: "Pick-up Location", dropoff: "Drop-off Location",
             flight: "Flight No. (Optional)", carType: "Vehicle Type", pax: "Passengers", 
-            luggageMedium: "Luggage (20-26\")", luggageLarge: "Luggage (28\"+)", 
+            luggageMedium: "Luggage (Up to 26\")", luggageLarge: "Luggage (28\"+)", 
             special: "Special Requests (Optional)", btn: "Submit Booking"
         },
         'ja': {
             title: "📅 空港送迎予約", time: "予約日時", pickup: "乗車場所", dropoff: "降車場所",
             flight: "便名 (任意)", carType: "車種を選択", pax: "乗車人数", 
-            luggageMedium: "荷物 (20-26インチ)", luggageLarge: "荷物 (28インチ以上)", 
+            luggageMedium: "荷物 (26インチ以下)", luggageLarge: "荷物 (28インチ以上)", 
             special: "特別なご要望 (任意)", btn: "予約を送信"
         },
         'ko': {
             title: "📅 공항 픽업 예약", time: "예약 시간", pickup: "탑승 장소", dropoff: "하차 장소",
             flight: "항공편 번호 (선택)", carType: "차량 유형", pax: "탑승 인원", 
-            luggageMedium: "수하물 (20-26인치)", luggageLarge: "수하물 (28인치 이상)", 
+            luggageMedium: "수하물 (26인치 이하)", luggageLarge: "수하물 (28인치 이상)", 
             special: "요청 사항 (선택)", btn: "예약 전송"
         },
         'th': {
             title: "📅 จองรถรับส่งสนามบิน", time: "วันและเวลา", pickup: "จุดรับ", dropoff: "จุดส่ง",
             flight: "เที่ยวบิน (ไม่บังคับ)", carType: "ประเภทรถ", pax: "จำนวนผู้โดยสาร", 
-            luggageMedium: "สัมภาระ (20-26 นิ้ว)", luggageLarge: "สัมภาระ (28 นิ้วขึ้นไป)", 
+            luggageMedium: "สัมภาระ (ไม่เกิน 26 นิ้ว)", luggageLarge: "สัมภาระ (28 นิ้วขึ้นไป)", 
             special: "คำขอพิเศษ (ไม่บังคับ)", btn: "ยืนยันการจอง"
         }
     };
@@ -148,10 +148,8 @@
                 
                 const currentUrl = decodeURIComponent(window.location.href).toLowerCase();
                 
-                // 預設為主場語言 (繁體中文)
                 let lang = 'zh-Hant'; 
                 
-                // 嚴格比對網址參數
                 if (currentUrl.includes('lang=en')) {
                     lang = 'en';
                 } else if (currentUrl.includes('lang=ja')) {
@@ -164,7 +162,6 @@
                 
                 document.getElementById('language').value = lang;
                 
-                // 替換畫面文字
                 document.getElementById('formTitle').innerText = i18n[lang].title;
                 document.getElementById('labelTime').innerText = i18n[lang].time;
                 document.getElementById('labelPickup').innerText = i18n[lang].pickup;
