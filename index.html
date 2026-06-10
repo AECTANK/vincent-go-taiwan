@@ -147,19 +147,17 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                // 🌟 核心修改：新增攔截網址參數的功能 🌟
-                const urlParams = new URLSearchParams(window.location.search);
-                const urlLang = urlParams.get('lang'); // 抓取網址後面的 ?lang= 值
-                
+                // 🌟 核心修改：加入 decodeURIComponent 強制解開 LINE 的亂碼 🌟
+                const currentUrl = decodeURIComponent(window.location.href).toLowerCase();
                 let lang = 'en'; // 系統底層預設為英文
                 
-                // 第一關：強制判斷網址帶過來的參數 (這會覆蓋手機系統語言)
-                if (urlLang === 'tw') {
+                // 第一關：判斷解碼後的網址字串
+                if (currentUrl.includes('lang=tw') || currentUrl.includes('lang=zh')) {
                     lang = 'zh-Hant';
-                } else if (urlLang === 'en') {
+                } else if (currentUrl.includes('lang=en')) {
                     lang = 'en';
                 } else {
-                    // 第二關：如果網址沒有帶參數，才退回使用 LINE App 自身的語系設定
+                    // 第二關：如果網址真的沒有帶參數，才退回使用 LINE App 自身的語系設定
                     const currentLang = (liff.getLanguage() || "").toLowerCase();
                     if (currentLang.includes('zh') || currentLang.includes('tw')) {
                         lang = 'zh-Hant';
@@ -182,7 +180,6 @@
                 document.getElementById('labelCarType').innerText = i18n[lang].carType;
                 document.getElementById('labelPax').innerText = i18n[lang].pax;
                 
-                // 新增兩個行李欄位的翻譯對應
                 document.getElementById('labelLuggageMedium').innerText = i18n[lang].luggageMedium;
                 document.getElementById('labelLuggageLarge').innerText = i18n[lang].luggageLarge;
                 
@@ -209,7 +206,6 @@
             carType: document.getElementById('carType').value, 
             pax: document.getElementById('pax').value,
             
-            // 將原本單一的 luggage 拆成兩個變數傳送
             luggageMedium: document.getElementById('luggageMedium').value,
             luggageLarge: document.getElementById('luggageLarge').value,
             
