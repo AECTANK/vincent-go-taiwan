@@ -7,20 +7,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        /* 方案B：五星海軍藍 (頂級飯店禮賓部質感) */
         body { 
-            background-color: #FDFBF7; /* 溫潤的珍珠燕麥白 */
+            background-color: #FDFBF7; 
             padding: 20px; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
         }
         .card { 
             border-radius: 15px; 
-            box-shadow: 0 8px 24px rgba(10, 37, 64, 0.08); /* 帶有微藍調的柔和懸浮陰影 */
+            box-shadow: 0 8px 24px rgba(10, 37, 64, 0.08); 
             border: none; 
             background-color: #FFFFFF;
         }
         .btn-primary { 
-            background-color: #0A2540; /* 頂級深海軍藍 */
+            background-color: #0A2540; 
             border-color: #0A2540; 
             color: #FFFFFF; 
             width: 100%; 
@@ -30,7 +29,7 @@
             transition: all 0.3s ease; 
         }
         .btn-primary:hover, .btn-primary:active { 
-            background-color: #153E75; /* 點擊時透出寶石藍微光澤 */
+            background-color: #153E75; 
             border-color: #153E75; 
             color: #FFFFFF; 
             box-shadow: 0 4px 12px rgba(10, 37, 64, 0.3); 
@@ -81,13 +80,13 @@
                 <input type="number" class="form-control" id="pax" min="1" max="8" value="1" required>
             </div>
 
-            <div class="row mb-3">
+            <div class="row mb-3 align-items-end">
                 <div class="col-6">
-                    <label class="form-label" id="labelLuggageMedium" style="font-size: 0.9rem;">行李 (20-26吋)</label>
+                    <label class="form-label mb-2" id="labelLuggageMedium" style="font-size: 0.85rem; line-height: 1.2;">行李 (20-26吋)</label>
                     <input type="number" class="form-control" id="luggageMedium" min="0" max="10" value="0" required>
                 </div>
                 <div class="col-6">
-                    <label class="form-label" id="labelLuggageLarge" style="font-size: 0.9rem;">行李 (28吋以上)</label>
+                    <label class="form-label mb-2" id="labelLuggageLarge" style="font-size: 0.85rem; line-height: 1.2;">行李 (28吋以上)</label>
                     <input type="number" class="form-control" id="luggageLarge" min="0" max="10" value="0" required>
                 </div>
             </div>
@@ -147,31 +146,25 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                // 🌟 核心修改：加入 decodeURIComponent 強制解開 LINE 的亂碼 🌟
                 const currentUrl = decodeURIComponent(window.location.href).toLowerCase();
-                let lang = 'en'; // 系統底層預設為英文
                 
-                // 第一關：判斷解碼後的網址字串
-                if (currentUrl.includes('lang=tw') || currentUrl.includes('lang=zh')) {
-                    lang = 'zh-Hant';
-                } else if (currentUrl.includes('lang=en')) {
+                // 預設為主場語言 (繁體中文)
+                let lang = 'zh-Hant'; 
+                
+                // 嚴格比對網址參數
+                if (currentUrl.includes('lang=en')) {
                     lang = 'en';
-                } else {
-                    // 第二關：如果網址真的沒有帶參數，才退回使用 LINE App 自身的語系設定
-                    const currentLang = (liff.getLanguage() || "").toLowerCase();
-                    if (currentLang.includes('zh') || currentLang.includes('tw')) {
-                        lang = 'zh-Hant';
-                    } else if (currentLang.includes('ja')) {
-                        lang = 'ja';
-                    } else if (currentLang.includes('ko')) {
-                        lang = 'ko';
-                    } else if (currentLang.includes('th')) {
-                        lang = 'th';
-                    }
+                } else if (currentUrl.includes('lang=ja')) {
+                    lang = 'ja';
+                } else if (currentUrl.includes('lang=ko')) {
+                    lang = 'ko';
+                } else if (currentUrl.includes('lang=th')) {
+                    lang = 'th';
                 }
                 
                 document.getElementById('language').value = lang;
                 
+                // 替換畫面文字
                 document.getElementById('formTitle').innerText = i18n[lang].title;
                 document.getElementById('labelTime').innerText = i18n[lang].time;
                 document.getElementById('labelPickup').innerText = i18n[lang].pickup;
@@ -179,10 +172,8 @@
                 document.getElementById('labelFlight').innerText = i18n[lang].flight;
                 document.getElementById('labelCarType').innerText = i18n[lang].carType;
                 document.getElementById('labelPax').innerText = i18n[lang].pax;
-                
                 document.getElementById('labelLuggageMedium').innerText = i18n[lang].luggageMedium;
                 document.getElementById('labelLuggageLarge').innerText = i18n[lang].luggageLarge;
-                
                 document.getElementById('labelSpecial').innerText = i18n[lang].special;
                 document.getElementById('submitBtn').innerText = i18n[lang].btn;
             } else {
@@ -205,10 +196,8 @@
             flight: document.getElementById('flightNo').value,
             carType: document.getElementById('carType').value, 
             pax: document.getElementById('pax').value,
-            
             luggageMedium: document.getElementById('luggageMedium').value,
             luggageLarge: document.getElementById('luggageLarge').value,
-            
             special: document.getElementById('specialRequest').value
         };
 
