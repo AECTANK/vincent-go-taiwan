@@ -48,23 +48,23 @@
             <input type="hidden" id="language" name="language">
 
             <div class="mb-3">
-                <label class="form-label" id="labelTime">預約時間</label>
+                <label class="form-label" id="labelTime">預約時間 <span class="text-danger">*</span></label>
                 <input type="datetime-local" class="form-control" id="pickupTime" required>
             </div>
             
             <div class="mb-3">
-                <label class="form-label" id="labelPickup">上車地點</label>
+                <label class="form-label" id="labelPickup">上車地點 <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="pickupLocation" placeholder="..." required>
             </div>
             
             <div class="mb-3">
-                <label class="form-label" id="labelDropoff">下車地點</label>
+                <label class="form-label" id="labelDropoff">下車地點 <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="dropoffLocation" placeholder="..." required>
             </div>
             
             <div class="mb-3">
-                <label class="form-label" id="labelFlight">航班號 (選填)</label>
-                <input type="text" class="form-control" id="flightNo" placeholder="如：JX840">
+                <label class="form-label" id="labelFlight">航班號 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="flightNo" placeholder="如：JX840" required>
             </div>
 
             <div class="mb-3">
@@ -104,32 +104,32 @@
     // --- 1. 語系翻譯包 ---
     const i18n = {
         'zh-Hant': {
-            title: "📅 機場接送預約單", time: "預約時間", pickup: "上車地點", dropoff: "下車地點",
-            flight: "航班號 (選填)", carType: "車型選擇", pax: "搭乘人數", 
+            title: "📅 機場接送預約單", time: "預約時間 <span class='text-danger'>*</span>", pickup: "上車地點 <span class='text-danger'>*</span>", dropoff: "下車地點 <span class='text-danger'>*</span>",
+            flight: "航班號 <span class='text-danger'>*</span>", carType: "車型選擇", pax: "搭乘人數", 
             luggageMedium: "行李 (26吋以下)", luggageLarge: "行李 (28吋以上)", 
             special: "特殊需求 (選填)", btn: "送出預約"
         },
         'en': {
-            title: "📅 Airport Transfer Booking", time: "Date & Time", pickup: "Pick-up Location", dropoff: "Drop-off Location",
-            flight: "Flight No. (Optional)", carType: "Vehicle Type", pax: "Passengers", 
+            title: "📅 Airport Transfer Booking", time: "Date & Time <span class='text-danger'>*</span>", pickup: "Pick-up Location <span class='text-danger'>*</span>", dropoff: "Drop-off Location <span class='text-danger'>*</span>",
+            flight: "Flight No. <span class='text-danger'>*</span>", carType: "Vehicle Type", pax: "Passengers", 
             luggageMedium: "Luggage (Up to 26\")", luggageLarge: "Luggage (28\"+)", 
             special: "Special Requests (Optional)", btn: "Submit Booking"
         },
         'ja': {
-            title: "📅 空港送迎予約", time: "予約日時", pickup: "乗車場所", dropoff: "降車場所",
-            flight: "便名 (任意)", carType: "車種を選択", pax: "乗車人数", 
+            title: "📅 空港送迎予約", time: "予約日時 <span class='text-danger'>*</span>", pickup: "乗車場所 <span class='text-danger'>*</span>", dropoff: "降車場所 <span class='text-danger'>*</span>",
+            flight: "便名 <span class='text-danger'>*</span>", carType: "車種を選択", pax: "乗車人数", 
             luggageMedium: "荷物 (26インチ以下)", luggageLarge: "荷物 (28インチ以上)", 
             special: "特別なご要望 (任意)", btn: "予約を送信"
         },
         'ko': {
-            title: "📅 공항 픽업 예약", time: "예약 시간", pickup: "탑승 장소", dropoff: "하차 장소",
-            flight: "항공편 번호 (선택)", carType: "차량 유형", pax: "탑승 인원", 
+            title: "📅 공항 픽업 예약", time: "예약 시간 <span class='text-danger'>*</span>", pickup: "탑승 장소 <span class='text-danger'>*</span>", dropoff: "하차 장소 <span class='text-danger'>*</span>",
+            flight: "항공편 번호 <span class='text-danger'>*</span>", carType: "차량 유형", pax: "탑승 인원", 
             luggageMedium: "수하물 (26인치 이하)", luggageLarge: "수하물 (28인치 이상)", 
             special: "요청 사항 (선택)", btn: "예약 전송"
         },
         'th': {
-            title: "📅 จองรถรับส่งสนามบิน", time: "วันและเวลา", pickup: "จุดรับ", dropoff: "จุดส่ง",
-            flight: "เที่ยวบิน (ไม่บังคับ)", carType: "ประเภทรถ", pax: "จำนวนผู้โดยสาร", 
+            title: "📅 จองรถรับส่งสนามบิน", time: "วันและเวลา <span class='text-danger'>*</span>", pickup: "จุดรับ <span class='text-danger'>*</span>", dropoff: "จุดส่ง <span class='text-danger'>*</span>",
+            flight: "เที่ยวบิน <span class='text-danger'>*</span>", carType: "ประเภทรถ", pax: "จำนวนผู้โดยสาร", 
             luggageMedium: "สัมภาระ (ไม่เกิน 26 นิ้ว)", luggageLarge: "สัมภาระ (28 นิ้วขึ้นไป)", 
             special: "คำขอพิเศษ (ไม่บังคับ)", btn: "ยืนยันการจอง"
         }
@@ -162,10 +162,12 @@
                 document.getElementById('language').value = lang;
                 
                 document.getElementById('formTitle').innerText = i18n[lang].title;
-                document.getElementById('labelTime').innerText = i18n[lang].time;
-                document.getElementById('labelPickup').innerText = i18n[lang].pickup;
-                document.getElementById('labelDropoff').innerText = i18n[lang].dropoff;
-                document.getElementById('labelFlight').innerText = i18n[lang].flight;
+                // 改用 innerHTML 來渲染帶有 HTML 標籤的紅色星星
+                document.getElementById('labelTime').innerHTML = i18n[lang].time;
+                document.getElementById('labelPickup').innerHTML = i18n[lang].pickup;
+                document.getElementById('labelDropoff').innerHTML = i18n[lang].dropoff;
+                document.getElementById('labelFlight').innerHTML = i18n[lang].flight;
+                
                 document.getElementById('labelCarType').innerText = i18n[lang].carType;
                 document.getElementById('labelPax').innerText = i18n[lang].pax;
                 document.getElementById('labelLuggageMedium').innerText = i18n[lang].luggageMedium;
@@ -182,6 +184,13 @@
 
     // --- 3. 傳送資料給 Make.com ---
     function sendData() {
+        const form = document.getElementById('bookingForm');
+        
+        // 【防呆機制】檢查表單內所有帶有 required 屬性的欄位是否都有填寫
+        if (!form.reportValidity()) {
+            return; // 若沒填寫完整，瀏覽器會自動跳出提示並中斷傳送
+        }
+
         const bookingData = {
             uid: document.getElementById('lineUid').value,
             name: document.getElementById('lineName').value,
