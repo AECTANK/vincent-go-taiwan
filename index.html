@@ -179,7 +179,7 @@
 </div>
 
 <script>
-    // --- 1. 語系翻譯包 (已將紅色星星 text-danger 替換為 text-gold) ---
+    // --- 1. 語系翻譯包 ---
     const i18n = {
         'zh-Hant': {
             title: "📅 機場接送預約單", time: "預約時間 <span class='text-gold'>*</span>", pickup: "上車地點 <span class='text-gold'>*</span>", dropoff: "下車地點 <span class='text-gold'>*</span>",
@@ -223,22 +223,24 @@
                 document.getElementById('lineUid').value = profile.userId;
                 document.getElementById('lineName').value = profile.displayName;
                 
-                const currentUrl = decodeURIComponent(window.location.href).toLowerCase();
+                // --- 取得 LINE APP 本身的語系設定 ---
+                // liff.getLanguage() 會回傳類似 'zh-TW', 'en-US', 'ja-JP' 的格式
+                const lineLang = liff.getLanguage() || navigator.language || navigator.userLanguage;
+                let lang = 'zh-Hant'; // 預設繁中
                 
-                let lang = 'zh-Hant'; 
-                
-                if (currentUrl.includes('lang=en')) {
+                if (lineLang.toLowerCase().startsWith('en')) {
                     lang = 'en';
-                } else if (currentUrl.includes('lang=ja')) {
+                } else if (lineLang.toLowerCase().startsWith('ja')) {
                     lang = 'ja';
-                } else if (currentUrl.includes('lang=ko')) {
+                } else if (lineLang.toLowerCase().startsWith('ko')) {
                     lang = 'ko';
-                } else if (currentUrl.includes('lang=th')) {
+                } else if (lineLang.toLowerCase().startsWith('th')) {
                     lang = 'th';
                 }
                 
                 document.getElementById('language').value = lang;
                 
+                // 動態切換畫面文字
                 document.getElementById('formTitle').innerText = i18n[lang].title;
                 document.getElementById('labelTime').innerHTML = i18n[lang].time;
                 document.getElementById('labelPickup').innerHTML = i18n[lang].pickup;
