@@ -2,170 +2,274 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vincent 專屬會員建檔 | VIP Registration</title>
-    <!-- 引入 Bootstrap 美化介面 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 引入 LINE 官方 LIFF SDK -->
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Registration / 客戶註冊</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Tailwind 颜色主题定制 (融入开运色：深蓝、黑、金、白、银)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#0F172A', // 深蓝 (属水)
+                            900: '#020617', // 极深蓝/近黑 (属水)
+                        },
+                        gold: {
+                            400: '#F59E0B', // 金色 (属金)
+                            500: '#D97706', // 丰收金 (属金)
+                        },
+                        silver: '#E2E8F0' // 银白 (属金)
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Microsoft JhengHei', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background-color: #f8f9fa; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: none; }
-        .btn-primary { background-color: #00B900; border-color: #00B900; width: 100%; border-radius: 10px; font-weight: bold; }
-        .btn-primary:hover { background-color: #009900; border-color: #009900; }
-        .vip-badge { text-align: center; color: #d4af37; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; }
+        body {
+            background-color: #020617; /* 纯黑底色 (属水) */
+        }
+        .gold-gradient-border {
+            position: relative;
+        }
+        .gold-gradient-border::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 1rem;
+            padding: 1px;
+            background: linear-gradient(to bottom, #F59E0B, #E2E8F0, #0F172A);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
     </style>
 </head>
-<body>
+<body class="text-white font-sans min-h-screen flex flex-col justify-between antialiased">
 
-<div class="container max-w-md mx-auto">
-    <div class="card p-4">
-        <div class="vip-badge">✦ VIP MEMBER ✦</div>
-        <h4 class="text-center mb-4" id="formTitle">👤 首次預約建檔</h4>
-        <p class="text-center text-muted mb-4" id="formDesc" style="font-size: 0.9rem;">由於你是第一次使用本預約系統，請您輸入以下資料，以便我們為您提供最完整的服務，謝謝。</p>
-        
-        <form id="registerForm">
-            <!-- 隱藏欄位：紀錄 LINE 的身分特徵 -->
-            <input type="hidden" id="lineUid" name="lineUid">
-            <input type="hidden" id="lineName" name="lineName">
-            <input type="hidden" id="language" name="language">
-
-            <div class="mb-3">
-                <label class="form-label" id="labelPassName">真實姓名 (乘車聯絡人)</label>
-                <input type="text" class="form-control" id="passengerName" required>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label" id="labelPassPhone">聯絡電話</label>
-                <input type="tel" class="form-control" id="passengerPhone" required>
-            </div>
-            
-            <div class="mb-4">
-                <label class="form-label" id="labelEmail">電子信箱</label>
-                <input type="email" class="form-control" id="email" required>
-            </div>
-
-            <button type="button" class="btn btn-primary py-2" id="submitBtn" onclick="sendData()">確認並完成預約</button>
-        </form>
+    <!-- Language Selector Top Bar -->
+    <div class="w-full max-w-md mx-auto px-6 pt-4 flex justify-end">
+        <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-navy-800 text-silver border border-gray-700 rounded-md px-2 py-1 text-xs focus:outline-none focus:border-gold-400 cursor-pointer">
+            <option value="zh">繁體中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+        </select>
     </div>
-</div>
 
-<script>
-    // --- 1. 五國語系翻譯包 ---
-    const i18n = {
-        'zh-Hant': {
-            title: "👤 首次預約建檔", desc: "由於你是第一次使用本預約系統，請您輸入以下資料，以便我們為您提供最完整的服務，謝謝。",
-            passName: "真實姓名 (乘車聯絡人)", passPhone: "聯絡電話", email: "電子信箱", btn: "確認並完成預約"
-        },
-        'en': {
-            title: "👤 First-Time Registration", desc: "Please provide your contact info to receive the booking confirmation.",
-            passName: "Full Name (Passenger)", passPhone: "Contact Phone", email: "Email Address", btn: "Confirm Booking"
-        },
-        'ja': {
-            title: "👤 初回登録", desc: "予約確認書をお送りするため、連絡先をご入力ください。",
-            passName: "お名前（乗客名）", passPhone: "電話番号", email: "メールアドレス", btn: "予約を確定する"
-        },
-        'ko': {
-            title: "👤 첫 예약 등록", desc: "예약 확인서를 받으실 연락처를 남겨주세요.",
-            passName: "성함 (탑승자)", passPhone: "연락처", email: "이메일", btn: "예약 확정"
-        },
-        'th': {
-            title: "👤 ลงทะเบียนครั้งแรก", desc: "โปรดระบุข้อมูลการติดต่อเพื่อรับใบยืนยันการจอง",
-            passName: "ชื่อ-นามสกุล (ผู้โดยสาร)", passPhone: "เบอร์โทรศัพท์", email: "อีเมล", btn: "ยืนยันการจอง"
-        }
-    };
-
-    // --- 2. 初始化 LIFF ---
-    async function initializeLiff() {
-        try {
-            // ⚠️ 這裡需要填入一個「全新的 LIFF ID」 ⚠️
-            await liff.init({ liffId: "2010242759-1robZxce" }); 
+    <!-- Main Container -->
+    <main class="w-full max-w-md mx-auto p-6 flex-grow flex flex-col justify-center">
+        <div class="bg-navy-800 rounded-2xl shadow-2xl p-8 gold-gradient-border relative">
             
-            if (liff.isLoggedIn()) {
-                const profile = await liff.getProfile();
-                document.getElementById('lineUid').value = profile.userId;
-                document.getElementById('lineName').value = profile.displayName;
-                
-                // 智慧語系偵測
-                const currentLang = (liff.getLanguage() || "").toLowerCase();
-                let lang = 'en'; 
-                
-                if (currentLang.includes('zh') || currentLang.includes('tw')) {
-                    lang = 'zh-Hant';
-                } else if (currentLang.includes('ja')) {
-                    lang = 'ja';
-                } else if (currentLang.includes('ko')) {
-                    lang = 'ko';
-                } else if (currentLang.includes('th')) {
-                    lang = 'th';
-                }
-                
-                document.getElementById('language').value = lang;
-                
-                // 替換畫面文字
-                document.getElementById('formTitle').innerText = i18n[lang].title;
-                document.getElementById('formDesc').innerText = i18n[lang].desc;
-                document.getElementById('labelPassName').innerText = i18n[lang].passName;
-                document.getElementById('labelPassPhone').innerText = i18n[lang].passPhone;
-                document.getElementById('labelEmail').innerText = i18n[lang].email;
-                document.getElementById('submitBtn').innerText = i18n[lang].btn;
-            } else {
-                liff.login(); 
-            }
-        } catch (err) {
-            console.error('LIFF 初始化失敗', err);
-        }
-    }
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 id="lblTitle" class="text-2xl font-bold text-white tracking-wide">客戶註冊</h1>
+                <p id="lblSubtitle" class="text-xs text-gray-400 mt-2">請填寫以下资料以完成註冊</p>
+            </div>
 
-    // --- 3. 傳送資料給 Make.com ---
-    function sendData() {
-        const registerData = {
-            type: "registration", // 加上 type 標籤，方便 Make 辨識這是註冊資料
-            uid: document.getElementById('lineUid').value,
-            name: document.getElementById('lineName').value,
-            lang: document.getElementById('language').value,
-            passName: document.getElementById('passengerName').value,
-            passPhone: document.getElementById('passengerPhone').value,
-            email: document.getElementById('email').value
+            <!-- Registration Form -->
+            <form id="regForm" onsubmit="handleRegister(event)" class="space-y-5">
+                <div>
+                    <label id="lblName" class="block text-xs font-semibold text-silver uppercase tracking-wider mb-2">姓名</label>
+                    <input type="text" id="txtName" required autocomplete="name" placeholder="王小明"
+                           class="w-full bg-navy-900 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-400 transition duration-200 text-sm">
+                </div>
+
+                <div>
+                    <label id="lblPhone" class="block text-xs font-semibold text-silver uppercase tracking-wider mb-2">電話</label>
+                    <input type="tel" id="txtPhone" required autocomplete="tel" placeholder="0912345678"
+                           class="w-full bg-navy-900 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-400 transition duration-200 text-sm">
+                </div>
+
+                <div>
+                    <label id="lblEmail" class="block text-xs font-semibold text-silver uppercase tracking-wider mb-2">Email</label>
+                    <input type="email" id="txtEmail" required autocomplete="email" placeholder="test@gmail.com"
+                           class="w-full bg-navy-900 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-400 transition duration-200 text-sm">
+                </div>
+
+                <button type="submit" id="btnSubmit"
+                        class="w-full bg-gradient-to-r from-gold-500 to-gold-400 hover:from-gold-400 hover:to-gold-500 text-navy-900 font-bold py-3 px-4 rounded-lg transition duration-200 transform active:scale-95 shadow-lg text-sm mt-2">
+                    確認註冊
+                </button>
+            </form>
+
+            <!-- Result Output Section (Strict Formatting for Router Password) -->
+            <div id="resultBox" class="mt-8 pt-6 border-t border-gray-800 hidden">
+                <label id="lblOutput" class="block text-xs font-semibold text-gold-400 uppercase tracking-wider mb-2">產生的資料 (可作為木星/路由器密碼)</label>
+                <div class="relative">
+                    <textarea id="txtOutput" readonly rows="4" 
+                              class="w-full bg-navy-900 border border-gold-500/30 rounded-lg p-3 text-xs text-silver font-mono focus:outline-none resize-none"></textarea>
+                    <button onclick="copyToClipboard()" id="btnCopy"
+                            class="absolute right-2 bottom-2 bg-navy-800 hover:bg-gray-800 text-gold-400 text-[10px] px-2 py-1 rounded border border-gold-400/50 transition">
+                        複製資料
+                    </button>
+                </div>
+                <p id="copySuccess" class="text-[10px] text-green-400 mt-1 hidden">✓ 已成功複製到剪貼簿</p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 text-[10px] text-gray-600 tracking-widest uppercase">
+        © 2026 Fleet Automation System. Secure & Protected.
+    </footer>
+
+    <!-- Multilingual & LIFF Logic Script -->
+    <script>
+        // 4国语言文本字典
+        const i18n = {
+            zh: {
+                title: "客戶註冊",
+                subtitle: "請填寫以下資料以完成註冊",
+                name: "姓名",
+                phone: "電話",
+                email: "Email",
+                submit: "確認註冊",
+                output: "產生的資料 (可作為路由器密碼)",
+                copy: "複製資料",
+                success: "✓ 已成功複製到剪貼簿",
+                alertSuccess: "資料已成功格式化！"
+            },
+            en: {
+                title: "Customer Registration",
+                subtitle: "Please fill out the form below to complete registration",
+                name: "Full Name",
+                phone: "Phone Number",
+                email: "Email Address",
+                submit: "Register Now",
+                output: "Generated Profile (Can be used as Router Password)",
+                copy: "Copy Data",
+                success: "✓ Copied to clipboard successfully",
+                alertSuccess: "Data formatted successfully!"
+            },
+            ja: {
+                title: "顧客会員登録",
+                subtitle: "登録を完了するには、以下のフォームに入力してください",
+                name: "お名前",
+                phone: "電話番号",
+                email: "メールアドレス",
+                submit: "登録する",
+                output: "生成されたデータ (ルーターのパスワードとして使用可能)",
+                copy: "データをコピー",
+                success: "✓ クリップボードにコピーされました",
+                alertSuccess: "データが正常にフォーマットされました！"
+            },
+            ko: {
+                title: "고객 등록",
+                subtitle: "등록을 완료하려면 아래 양식을 작성해 주세요",
+                name: "이름",
+                phone: "전화번호",
+                email: "이메일 주소",
+                submit: "지금 등록",
+                output: "생성된 데이터 (라우터 비밀번호로 사용 가능)",
+                copy: "데이터 복사",
+                success: "✓ 클립보드에 복사되었습니다",
+                alertSuccess: "데이터가 성공적으로 포맷되었습니다!"
+            }
         };
 
-        // ⚠️ 貼上您的 Make Webhook 網址 (可以跟行程表單用同一個) ⚠️
-        const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/cv6wmi0n71l92wxpe4buasv94vbh8p4y";
-
-        document.getElementById('submitBtn').innerText = "處理中...";
-        document.getElementById('submitBtn').disabled = true;
-
-        fetch(MAKE_WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(registerData)
-        })
-        .then(response => {
-            if (response.ok) {
-                let successMsg = "建檔完成！您的派車單已寄出。";
-                if(registerData.lang === 'en') successMsg = "Registration complete! Confirmation sent.";
-                if(registerData.lang === 'ja') successMsg = "登録完了！確認書を送信しました。";
-                if(registerData.lang === 'ko') successMsg = "등록 완료! 예약 확인서가 전송되었습니다.";
-                if(registerData.lang === 'th') successMsg = "ลงทะเบียนสำเร็จ! ส่งใบยืนยันแล้ว";
-                
-                alert(successMsg);
-                liff.closeWindow(); 
-            } else {
-                alert("傳送失敗，請稍後再試。");
-                document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
-                document.getElementById('submitBtn').disabled = false;
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("網路錯誤，請檢查連線。");
-            document.getElementById('submitBtn').innerText = i18n[document.getElementById('language').value].btn;
-            document.getElementById('submitBtn').disabled = false;
+        // 页面初始化
+        document.addEventListener("DOMContentLoaded", function() {
+            initLanguage();
+            initLIFF();
         });
-    }
 
-    window.onload = initializeLiff;
-</script>
+        // 语言初始化侦测
+        function initLanguage() {
+            const userLang = navigator.language || navigator.userLanguage;
+            let defaultLang = 'zh'; // 默认繁中
+            
+            if (userLang.startsWith('en')) defaultLang = 'en';
+            else if (userLang.startsWith('ja')) defaultLang = 'ja';
+            else if (userLang.startsWith('ko')) defaultLang = 'ko';
+            
+            document.getElementById('langSelect').value = defaultLang;
+            changeLanguage(defaultLang);
+        }
 
+        // 切换语言UI
+        function changeLanguage(lang) {
+            const t = i18n[lang];
+            document.getElementById('lblTitle').innerText = t.title;
+            document.getElementById('lblSubtitle').innerText = t.subtitle;
+            document.getElementById('lblName').innerText = t.name;
+            document.getElementById('lblPhone').innerText = t.phone;
+            document.getElementById('lblEmail').innerText = t.email;
+            document.getElementById('btnSubmit').innerText = t.submit;
+            document.getElementById('lblOutput').innerText = t.output;
+            document.getElementById('btnCopy').innerText = t.copy;
+            document.getElementById('copySuccess').innerText = t.success;
+        }
+
+        // LINE LIFF 初始化
+        function initLIFF() {
+            // 请在此处替换为您在 LINE Developers 后台申请的真实 LIFF ID
+            liff.init({ liffId: "YOUR_LIFF_ID_HERE" })
+                .then(() => {
+                    console.log("LIFF Initialization Success");
+                })
+                .catch((err) => {
+                    console.error("LIFF Initialization Failed", err);
+                });
+        }
+
+        // 表单提交与严格格式化输出逻辑
+        function handleRegister(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('txtName').value.trim();
+            const phone = document.getElementById('txtPhone').value.trim();
+            const email = document.getElementById('txtEmail').value.trim();
+
+            // 严格遵循左侧要求的格式输出 (用于作 Router 密码)
+            const formattedResult = `[註冊資料]\n姓名：${name}\n電話：${phone}\nEmail：${email}`;
+            
+            // 显示并填入结果框
+            document.getElementById('txtOutput').value = formattedResult;
+            document.getElementById('resultBox').classList.remove('hidden');
+
+            const currentLang = document.getElementById('langSelect').value;
+
+            // 如果是在 LINE 环境内打开，同步将该注册信息发送给 LINE 机器人后台
+            if (liff.isLoggedIn() && liff.isInClient()) {
+                liff.sendMessages([{
+                    type: 'text',
+                    text: formattedResult
+                }]).then(() => {
+                    liff.closeWindow();
+                }).catch((err) => {
+                    console.error("Error sending message: ", err);
+                    alert(i18n[currentLang].alertSuccess);
+                });
+            } else {
+                alert(i18n[currentLang].alertSuccess);
+            }
+        }
+
+        // 复制到剪贴簿功能
+        function copyToClipboard() {
+            const copyText = document.getElementById("txtOutput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // 针对移动端优化
+            navigator.clipboard.writeText(copyText.value);
+            
+            const successMsg = document.getElementById('copySuccess');
+            successMsg.classList.remove('hidden');
+            setTimeout(() => {
+                successMsg.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
