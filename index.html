@@ -8,37 +8,115 @@
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { 
-            background-color: #FDFBF7; 
+            background-color: #020617; /* 曜石黑底色 (屬水) */
             padding: 20px; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            color: #E2E8F0;
+        }
+        .container {
+            max-width: 500px;
         }
         .card { 
-            border-radius: 15px; 
-            box-shadow: 0 8px 24px rgba(10, 37, 64, 0.08); 
-            border: none; 
-            background-color: #FFFFFF;
+            border-radius: 16px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            background-color: #121A2F; /* 深海藍卡片 (屬水) */
+            border: 1px solid rgba(212, 175, 55, 0.2); /* 隱約的金邊 */
+            position: relative;
+            overflow: hidden;
         }
+        /* 頂部金色漸層光條 */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, #D4AF37, #FDE08B, #D4AF37);
+        }
+        #formTitle {
+            color: #D4AF37;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        .form-label {
+            color: #A0AAB2; /* 銀灰色標籤 (屬金) */
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .text-gold {
+            color: #D4AF37 !important; /* 必填星號改為金色 */
+        }
+        /* 輸入框深色模式訂製 */
+        .form-control, .form-select {
+            background-color: #0A1931;
+            border: 1px solid #1E2A44;
+            color: #FFFFFF;
+            border-radius: 8px;
+            padding: 10px 15px;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #0F203C;
+            border-color: #D4AF37;
+            color: #FFFFFF;
+            box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+        }
+        .form-select option {
+            background-color: #0A1931;
+            color: #FFFFFF;
+        }
+        ::placeholder {
+            color: #4A5B76 !important;
+            opacity: 1;
+        }
+        /* 修正手機瀏覽器自動填寫時的白底衝突 */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #0A1931 inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        /* 讓日期選擇器的月曆小圖示在黑底上變成白色 */
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        ::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        /* 按鈕尊榮金設計 */
         .btn-primary { 
-            background-color: #0A2540; 
-            border-color: #0A2540; 
-            color: #FFFFFF; 
+            background: linear-gradient(135deg, #D4AF37, #F59E0B); /* 漸層金 (屬金) */
+            border: none;
+            color: #020617; /* 深黑字體 */
             width: 100%; 
             border-radius: 10px; 
             font-weight: bold; 
             letter-spacing: 1px; 
             transition: all 0.3s ease; 
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            margin-top: 10px;
         }
         .btn-primary:hover, .btn-primary:active { 
-            background-color: #153E75; 
-            border-color: #153E75; 
-            color: #FFFFFF; 
-            box-shadow: 0 4px 12px rgba(10, 37, 64, 0.3); 
+            background: linear-gradient(135deg, #FDE08B, #D4AF37);
+            color: #020617; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        .btn-primary:disabled {
+            background: #4A5B76;
+            color: #A0AAB2;
+            box-shadow: none;
+            transform: none;
         }
     </style>
 </head>
 <body>
 
-<div class="container max-w-md mx-auto">
+<div class="container mx-auto">
     <div class="card p-4">
         <h4 class="text-center mb-4" id="formTitle">📅 機場接送預約單</h4>
         
@@ -48,22 +126,22 @@
             <input type="hidden" id="language" name="language">
 
             <div class="mb-3">
-                <label class="form-label" id="labelTime">預約時間 <span class="text-danger">*</span></label>
+                <label class="form-label" id="labelTime">預約時間 <span class="text-gold">*</span></label>
                 <input type="datetime-local" class="form-control" id="pickupTime" required>
             </div>
             
             <div class="mb-3">
-                <label class="form-label" id="labelPickup">上車地點 <span class="text-danger">*</span></label>
+                <label class="form-label" id="labelPickup">上車地點 <span class="text-gold">*</span></label>
                 <input type="text" class="form-control" id="pickupLocation" placeholder="..." required>
             </div>
             
             <div class="mb-3">
-                <label class="form-label" id="labelDropoff">下車地點 <span class="text-danger">*</span></label>
+                <label class="form-label" id="labelDropoff">下車地點 <span class="text-gold">*</span></label>
                 <input type="text" class="form-control" id="dropoffLocation" placeholder="..." required>
             </div>
             
             <div class="mb-3">
-                <label class="form-label" id="labelFlight">航班號 <span class="text-danger">*</span></label>
+                <label class="form-label" id="labelFlight">航班號 <span class="text-gold">*</span></label>
                 <input type="text" class="form-control" id="flightNo" placeholder="如：JX840" required>
             </div>
 
@@ -95,41 +173,41 @@
                 <input type="text" class="form-control" id="specialRequest" placeholder="...">
             </div>
 
-            <button type="button" class="btn btn-primary py-2" id="submitBtn" onclick="sendData()">送出預約</button>
+            <button type="button" class="btn btn-primary py-3" id="submitBtn" onclick="sendData()">送出預約</button>
         </form>
     </div>
 </div>
 
 <script>
-    // --- 1. 語系翻譯包 ---
+    // --- 1. 語系翻譯包 (已將紅色星星 text-danger 替換為 text-gold) ---
     const i18n = {
         'zh-Hant': {
-            title: "📅 機場接送預約單", time: "預約時間 <span class='text-danger'>*</span>", pickup: "上車地點 <span class='text-danger'>*</span>", dropoff: "下車地點 <span class='text-danger'>*</span>",
-            flight: "航班號 <span class='text-danger'>*</span>", carType: "車型選擇", pax: "搭乘人數", 
+            title: "📅 機場接送預約單", time: "預約時間 <span class='text-gold'>*</span>", pickup: "上車地點 <span class='text-gold'>*</span>", dropoff: "下車地點 <span class='text-gold'>*</span>",
+            flight: "航班號 <span class='text-gold'>*</span>", carType: "車型選擇", pax: "搭乘人數", 
             luggageMedium: "行李 (26吋以下)", luggageLarge: "行李 (28吋以上)", 
             special: "特殊需求 (選填)", btn: "送出預約"
         },
         'en': {
-            title: "📅 Airport Transfer Booking", time: "Date & Time <span class='text-danger'>*</span>", pickup: "Pick-up Location <span class='text-danger'>*</span>", dropoff: "Drop-off Location <span class='text-danger'>*</span>",
-            flight: "Flight No. <span class='text-danger'>*</span>", carType: "Vehicle Type", pax: "Passengers", 
+            title: "📅 Airport Transfer Booking", time: "Date & Time <span class='text-gold'>*</span>", pickup: "Pick-up Location <span class='text-gold'>*</span>", dropoff: "Drop-off Location <span class='text-gold'>*</span>",
+            flight: "Flight No. <span class='text-gold'>*</span>", carType: "Vehicle Type", pax: "Passengers", 
             luggageMedium: "Luggage (Up to 26\")", luggageLarge: "Luggage (28\"+)", 
             special: "Special Requests (Optional)", btn: "Submit Booking"
         },
         'ja': {
-            title: "📅 空港送迎予約", time: "予約日時 <span class='text-danger'>*</span>", pickup: "乗車場所 <span class='text-danger'>*</span>", dropoff: "降車場所 <span class='text-danger'>*</span>",
-            flight: "便名 <span class='text-danger'>*</span>", carType: "車種を選択", pax: "乗車人数", 
+            title: "📅 空港送迎予約", time: "予約日時 <span class='text-gold'>*</span>", pickup: "乗車場所 <span class='text-gold'>*</span>", dropoff: "降車場所 <span class='text-gold'>*</span>",
+            flight: "便名 <span class='text-gold'>*</span>", carType: "車種を選択", pax: "乗車人数", 
             luggageMedium: "荷物 (26インチ以下)", luggageLarge: "荷物 (28インチ以上)", 
             special: "特別なご要望 (任意)", btn: "予約を送信"
         },
         'ko': {
-            title: "📅 공항 픽업 예약", time: "예약 시간 <span class='text-danger'>*</span>", pickup: "탑승 장소 <span class='text-danger'>*</span>", dropoff: "하차 장소 <span class='text-danger'>*</span>",
-            flight: "항공편 번호 <span class='text-danger'>*</span>", carType: "차량 유형", pax: "탑승 인원", 
+            title: "📅 공항 픽업 예약", time: "예약 시간 <span class='text-gold'>*</span>", pickup: "탑승 장소 <span class='text-gold'>*</span>", dropoff: "하차 장소 <span class='text-gold'>*</span>",
+            flight: "항공편 번호 <span class='text-gold'>*</span>", carType: "차량 유형", pax: "탑승 인원", 
             luggageMedium: "수하물 (26인치 이하)", luggageLarge: "수하물 (28인치 이상)", 
             special: "요청 사항 (선택)", btn: "예약 전송"
         },
         'th': {
-            title: "📅 จองรถรับส่งสนามบิน", time: "วันและเวลา <span class='text-danger'>*</span>", pickup: "จุดรับ <span class='text-danger'>*</span>", dropoff: "จุดส่ง <span class='text-danger'>*</span>",
-            flight: "เที่ยวบิน <span class='text-danger'>*</span>", carType: "ประเภทรถ", pax: "จำนวนผู้โดยสาร", 
+            title: "📅 จองรถรับส่งสนามบิน", time: "วันและเวลา <span class='text-gold'>*</span>", pickup: "จุดรับ <span class='text-gold'>*</span>", dropoff: "จุดส่ง <span class='text-gold'>*</span>",
+            flight: "เที่ยวบิน <span class='text-gold'>*</span>", carType: "ประเภทรถ", pax: "จำนวนผู้โดยสาร", 
             luggageMedium: "สัมภาระ (ไม่เกิน 26 นิ้ว)", luggageLarge: "สัมภาระ (28 นิ้วขึ้นไป)", 
             special: "คำขอพิเศษ (ไม่บังคับ)", btn: "ยืนยันการจอง"
         }
@@ -162,7 +240,6 @@
                 document.getElementById('language').value = lang;
                 
                 document.getElementById('formTitle').innerText = i18n[lang].title;
-                // 改用 innerHTML 來渲染帶有 HTML 標籤的紅色星星
                 document.getElementById('labelTime').innerHTML = i18n[lang].time;
                 document.getElementById('labelPickup').innerHTML = i18n[lang].pickup;
                 document.getElementById('labelDropoff').innerHTML = i18n[lang].dropoff;
