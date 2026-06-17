@@ -186,7 +186,7 @@
             const phone = document.getElementById('txtPhone').value.trim();
             const email = document.getElementById('txtEmail').value.trim();
 
-            const formattedResult = `[註冊資料]\n姓名：${name}\n電話：${phone}\nEmail：${email}`;
+            const formattedResult = `【新客註冊資料】\n姓名：${name}\n電話：${phone}\nEmail：${email}`;
             
             if (liff.isLoggedIn() && liff.isInClient()) {
                 liff.sendMessages([{
