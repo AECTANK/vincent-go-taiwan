@@ -124,6 +124,9 @@
             <input type="hidden" id="lineUid" name="lineUid">
             <input type="hidden" id="lineName" name="lineName">
             <input type="hidden" id="language" name="language">
+            
+            <input type="hidden" id="orderId" name="orderId">
+            <input type="hidden" id="formAction" name="formAction" value="new">
 
             <div class="mb-3">
                 <label class="form-label" id="labelTime">預約時間 <span class="text-gold">*</span></label>
@@ -224,7 +227,6 @@
                 document.getElementById('lineName').value = profile.displayName;
                 
                 // --- 取得 LINE APP 本身的語系設定 ---
-                // liff.getLanguage() 會回傳類似 'zh-TW', 'en-US', 'ja-JP' 的格式
                 const lineLang = liff.getLanguage() || navigator.language || navigator.userLanguage;
                 let lang = 'zh-Hant'; // 預設繁中
                 
@@ -240,7 +242,7 @@
                 
                 document.getElementById('language').value = lang;
                 
-                // 動態切換畫面文字
+                // 動態切換畫面文字 (預設為新增模式)
                 document.getElementById('formTitle').innerText = i18n[lang].title;
                 document.getElementById('labelTime').innerHTML = i18n[lang].time;
                 document.getElementById('labelPickup').innerHTML = i18n[lang].pickup;
@@ -253,6 +255,37 @@
                 document.getElementById('labelLuggageLarge').innerText = i18n[lang].luggageLarge;
                 document.getElementById('labelSpecial').innerText = i18n[lang].special;
                 document.getElementById('submitBtn').innerText = i18n[lang].btn;
+
+                // --- 👇 核心升級：讀取網址參數帶入舊資料 👇 ---
+                const urlParams = new URLSearchParams(window.location.search);
+                const actionParam = urlParams.get('action');
+                
+                if (actionParam === 'edit') {
+                    // 1. 標記這是一份修改單並帶入訂單ID
+                    document.getElementById('formAction').value = "edit";
+                    if(urlParams.has('orderId')) document.getElementById('orderId').value = urlParams.get('orderId');
+                    
+                    // 2. 更改標題為修改模式 (多語系後綴)
+                    let editSuffix = " (修改)";
+                    if(lang === 'en') editSuffix = " (Edit)";
+                    if(lang === 'ja') editSuffix = " (編集)";
+                    if(lang === 'ko') editSuffix = " (수정)";
+                    if(lang === 'th') editSuffix = " (แก้ไข)";
+                    document.getElementById('formTitle').innerText = i18n[lang].title + editSuffix;
+                    
+                    // 3. 把網址列上的舊資料塞進格子裡
+                    if(urlParams.has('time')) document.getElementById('pickupTime').value = urlParams.get('time');
+                    if(urlParams.has('pickup')) document.getElementById('pickupLocation').value = urlParams.get('pickup');
+                    if(urlParams.has('dropoff')) document.getElementById('dropoffLocation').value = urlParams.get('dropoff');
+                    if(urlParams.has('flight')) document.getElementById('flightNo').value = urlParams.get('flight');
+                    if(urlParams.has('car')) document.getElementById('carType').value = urlParams.get('car');
+                    if(urlParams.has('pax')) document.getElementById('pax').value = urlParams.get('pax');
+                    if(urlParams.has('lugM')) document.getElementById('luggageMedium').value = urlParams.get('lugM');
+                    if(urlParams.has('lugL')) document.getElementById('luggageLarge').value = urlParams.get('lugL');
+                    if(urlParams.has('special')) document.getElementById('specialRequest').value = urlParams.get('special');
+                }
+                // --- 👆 核心升級結束 👆 ---
+
             } else {
                 liff.login(); 
             }
@@ -270,7 +303,10 @@
             return; // 若沒填寫完整，瀏覽器會自動跳出提示並中斷傳送
         }
 
+        // 👇 核心升級：將 action 與 orderId 包裝進送出的 JSON 裡 👇
         const bookingData = {
+            action: document.getElementById('formAction').value,
+            orderId: document.getElementById('orderId').value,
             uid: document.getElementById('lineUid').value,
             name: document.getElementById('lineName').value,
             lang: document.getElementById('language').value,
@@ -297,11 +333,11 @@
         })
         .then(response => {
             if (response.ok) {
-                let successMsg = "預約資料已送出！客服系統將立即為您報價。";
-                if(bookingData.lang === 'en') successMsg = "Booking submitted! We will quote you shortly.";
-                if(bookingData.lang === 'ja') successMsg = "予約が送信されました！すぐにお見積もりいたします。";
-                if(bookingData.lang === 'ko') successMsg = "예약이 전송되었습니다! 곧 견적을 보내드리겠습니다.";
-                if(bookingData.lang === 'th') successMsg = "ส่งข้อมูลการจองแล้ว! เราจะเสนอราคาให้คุณเร็วๆ นี้";
+                let successMsg = "預約資料已送出！客服系統將立即為您安排。";
+                if(bookingData.lang === 'en') successMsg = "Booking submitted! We will arrange it shortly.";
+                if(bookingData.lang === 'ja') successMsg = "予約が送信されました！すぐに手配いたします。";
+                if(bookingData.lang === 'ko') successMsg = "예약이 전송되었습니다! 곧 배차를 준비하겠습니다.";
+                if(bookingData.lang === 'th') successMsg = "ส่งข้อมูลการจองแล้ว! เราจะจัดการให้คุณเร็วๆ นี้";
                 
                 alert(successMsg);
                 liff.closeWindow(); 
